@@ -1,83 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:frase_do_dia/pages/home_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(FraseApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+bool carregando = false;
 
+class FraseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clima Agora',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const WeatherPage(),
+      title: 'Frase do Dia',
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        scaffoldBackgroundColor: Colors.white,
+      ),
+      home: HomePage(),
     );
   }
 }
 
-class WeatherPage extends StatefulWidget {
-  const WeatherPage({super.key});
-
+class FraseHomePage extends StatefulWidget {
   @override
-  State<WeatherPage> createState() => _WeatherPageState();
+  _FraseHomePageState createState() => _FraseHomePageState();
 }
 
-class _WeatherPageState extends State<WeatherPage> {
-  Map<String, dynamic>? weatherData;
-  final String city = 'Porto Alegre';
-  final String apiKey = '5f55633c3e955e3b15d1755db89dbf55'; // substitua pela sua chave
+class _FraseHomePageState extends State<FraseHomePage> {
+  String frase = "Clique no botão para ver uma frase.";
+  String autor = "";
 
-  @override
-  void initState() {
-    super.initState();
-    fetchWeather();
-  }
+  Future<void> buscarFrase() async {
+    final url = Uri.parse('https://api.api-ninjas.com/v1/quotes');
+    setState(() {
+      carregando = true;
+    });
+    try {
+      final resposta = await http.get(
+        url,
+        headers: {'X-Api-Key': 'ormo4vCwluIB/uYSRkWE4Q==S9tgf6XmgWElE0Vt'},
+      );
 
-  Future<void> fetchWeather() async {
-    final url = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric&lang=pt_br',
-    );
-
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
+      if (resposta.statusCode == 200) {
+        final dados = json.decode(resposta.body);
+        setState(() {
+          frase = dados[0]['quote'];
+          autor = "- ${dados[0]['author']}";
+        });
+      } else {
+        setState(() {
+          frase = "Erro ao carregar frase.";
+          autor = "";
+        });
+      }
+    } finally {
       setState(() {
-        weatherData = json.decode(response.body);
+        carregando = false;
       });
-    } else {
-      debugPrint('Erro ao buscar clima: ${response.statusCode}');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Clima em $city')),
-      body: weatherData == null
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${weatherData!['main']['temp']}°C',
-                    style: const TextStyle(fontSize: 48),
+      appBar: AppBar(title: Text('Frase do Dia')),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child:
+              carregando
+                  ? CircularProgressIndicator()
+                  : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        frase,
+                        style: TextStyle(fontSize: 22),
+                        textAlign: TextAlign.center,
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: '$frase $autor'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Frase copiada!')),
+                          );
+                        },
+                        icon: Icon(Icons.copy),
+                        label: Text("Copiar Frase"),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        autor,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    weatherData!['weather'][0]['description'],
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  const SizedBox(height: 20),
-                  Image.network(
-                    'https://openweathermap.org/img/wn/${weatherData!['weather'][0]['icon']}@2x.png',
-                  ),
-                ],
-              ),
-            ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: buscarFrase,
+        child: Icon(Icons.refresh),
+        tooltip: 'Nova Frase',
+      ),
     );
   }
 }

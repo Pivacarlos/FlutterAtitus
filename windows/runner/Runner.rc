@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "testeflutte" "\0"
+            VALUE "FileDescription", "frase_do_dia" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "testeflutte" "\0"
+            VALUE "InternalName", "frase_do_dia" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "testeflutte.exe" "\0"
-            VALUE "ProductName", "testeflutte" "\0"
+            VALUE "OriginalFilename", "frase_do_dia.exe" "\0"
+            VALUE "ProductName", "frase_do_dia" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
