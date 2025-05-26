@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class FraseCard extends StatelessWidget {
   final String texto;
 
-  const FraseCard({required this.texto});
+  const FraseCard({super.key, required this.texto});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
           texto,
-          style: TextStyle(fontSize: 20),
+          style: const TextStyle(fontSize: 22),
           textAlign: TextAlign.center,
         ),
-      ),
+        const SizedBox(height: 20),
+        ElevatedButton.icon(
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: texto));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Frase copiada!')),
+            );
+          },
+          icon: const Icon(Icons.copy),
+          label: const Text("Copiar Frase"),
+        ),
+      ],
     );
   }
 }

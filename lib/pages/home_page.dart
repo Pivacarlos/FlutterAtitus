@@ -5,6 +5,8 @@ import '../widgets/frase_card.dart';
 import '../widgets/botao_refresh.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -21,12 +23,12 @@ class _HomePageState extends State<HomePage> {
       headers: {'X-Api-Key': 'ormo4vCwluIB/uYSRkWE4Q==S9tgf6XmgWElE0Vt'},
     );
 
+    if (!mounted) return;
+
     if (resposta.statusCode == 200) {
       final dados = json.decode(resposta.body);
-      final fraseIngles = dados[0]['quote'];
-
       setState(() {
-        frase = fraseIngles;
+        frase = dados[0]['quote'];
         carregando = false;
       });
     } else {
@@ -40,14 +42,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Frase do Dia')),
+      appBar: AppBar(title: const Text('Frase do Dia')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child:
-              carregando
-                  ? CircularProgressIndicator()
-                  : FraseCard(texto: frase),
+          child: carregando
+              ? const CircularProgressIndicator()
+              : FraseCard(texto: frase),
         ),
       ),
       floatingActionButton: BotaoRefresh(onPressed: buscarFrase),
